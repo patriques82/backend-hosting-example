@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon index.js",
-    "prod": "node index.js"
+    "build": "echo noop",
+    "start": "node index.js"
   },
   "author": "Patrik Nygren",
   "license": "ISC",
