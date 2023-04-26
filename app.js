@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 
 import User from "./db/user.js";
 import dbConnect from "./db/database.js";
+import auth from "./auth.js";
 
 const app = express();
 dbConnect();
@@ -15,10 +16,7 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
   );
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTION");
   next();
 });
 
@@ -39,6 +37,18 @@ app.post("/register", async (request, response) => {
     });
     try {
       const result = await user.save(); // User.insertOne
+      console.log("successful save in mongodb atlas");
+      if (result) {
+        response.status(201).send({
+          message: "Successfull registration",
+          result,
+        });
+      } else {
+        // Database not working
+        response.status(500).send({
+          message: "Server Error",
+        });
+      }
     } catch (error) {
       // User sent wrong data
       console.log("Something went wrong", error);
@@ -82,6 +92,23 @@ app.post("/login", async (request, response) => {
       message: "Bad Request",
     });
   }
+});
+
+// Dashboard makes request to this endpoint
+app.get("/secured", auth, (request, response) => {
+  const { userId, userEmail } = request.user;
+  response.status(200).send({
+    message: "You have access",
+    userId,
+    userEmail,
+  });
+});
+
+// FreeComponent makes request to this component
+app.get("/unsecured", (request, response) => {
+  response.status(200).send({
+    message: "Everyone have access",
+  });
 });
 
 export default app;
